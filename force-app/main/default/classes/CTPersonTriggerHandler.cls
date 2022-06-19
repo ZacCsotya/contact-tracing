@@ -3,7 +3,7 @@
  * @Class Purpose  : Person trigger logic.
  * @Author         : Zachary Csotya
  * @Developed On   : 05/19/2022
- * @Last Modified  : 05/19/2022
+ * @Last Modified  : 05/31/2022
 **/
 public with sharing class CTPersonTriggerHandler {
     
@@ -41,7 +41,7 @@ public with sharing class CTPersonTriggerHandler {
     **/
     public static void afterUpdate(List<Person__c> newRecords, Map<Id, Person__c> oldRecordsMap) {
         Set<Id> statusChange = new Set<Id>();
-        Set<Id> resStatus = new Set<Id>();
+        Set<Id> redStatus = new Set<Id>();
         for(Person__c person : newRecords) {
             if(person.Health_Status__c != oldRecordsMap.get(person.Id).Health_Status__c) {
                 statusChange.add(person.Id);

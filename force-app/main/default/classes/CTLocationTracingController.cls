@@ -3,7 +3,7 @@
  * @Class Purpose  : 
  * @Author         : Zachary Csotya
  * @Developed On   : 04/25/2022
- * @Last Modified  : 05/19/2022
+ * @Last Modified  : 06/12/2022
 **/
 public with sharing class CTLocationTracingController {
    
@@ -14,7 +14,7 @@ public with sharing class CTLocationTracingController {
     * @return List<Location_Tracing__c> 
     **/
     public static List<Location_Tracing__c> getVisitors(String locationId) {
-        return [SELECT Id, Person__c, Location__c, Visit_Date__c 
+        return [SELECT Id, Person__c, Location__c, Visit_Date__c, Person__r.Token__c, Person__r.Health_Status__c
                FROM Location_Tracing__c
                WHERE Location__c=:locationId
                ORDER BY Visit_Date__c DESC];

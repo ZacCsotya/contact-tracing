@@ -3,7 +3,7 @@
  * @Class Purpose  : Handles logic surrounding the Location Object.
  * @Author         : Zachary Csotya
  * @Developed On   : 04/25/2022
- * @Last Modified  : 05/19/2022
+ * @Last Modified  : 05/31/2022
 **/
 public with sharing class CTLocationController {
     
@@ -46,7 +46,7 @@ public with sharing class CTLocationController {
                                        FROM Location__c
                                        WHERE Id=:locationId];
 
-        if(locations != null && location.size() > 0) {
+        if(locations != null && locations.size() > 0) {
             return locations[0];
         }
         return null;
@@ -109,5 +109,20 @@ public with sharing class CTLocationController {
         } else {
             return 'Red';
         }
+    }
+
+    public static Map<String, Integer> getHealthStatusCount() {
+        AggregateResult[] healthCountMap = [SELECT Status__c, Count(Id) total
+                                            FROM Location__c 
+                                            GROUP BY Status__c];
+
+        if(healthCountMap != null && healthCountMap.size() > 0) {
+            Map<String, Integer> result = new Map<String, Integer>();
+            for (AggregateResult ar : healthCountMap) {
+                result.put(String.valueOf(ar.get('Status__c')), Integer.valueOf(ar.get('total')));
+            }
+            return result;
+        }
+        return null;
     }
 }

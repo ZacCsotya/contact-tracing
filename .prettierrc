@@ -1,4 +1,9 @@
 {
+  "printWidth": 160,
+  "useTabs": true,
+  "tabWidth": 4,
+  "bracketSpacing": true,
+  "bracketSameLine": true,
   "trailingComma": "none",
   "overrides": [
     {

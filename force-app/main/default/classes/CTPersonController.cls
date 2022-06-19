@@ -3,7 +3,7 @@
  * @Class Purpose  : Handle logic surrounding a Person object.
  * @Author         : Zachary Csotya
  * @Developed On   : 04/25/2022
- * @Last Modified  : 05/19/2022
+ * @Last Modified  : 06/05/2022
 **/
 
 public with sharing class CTPersonController {
@@ -70,15 +70,21 @@ public with sharing class CTPersonController {
     * @return Map<String, Integer> 
     **/
     public static Map<String, Integer> getHealthStatusCount() {
-        Map<String, Integer> healthStatusMap = new Map<String, Integer>();
-        for(AggregateResult ar : [SELECT Health_Status__c, COUNT(Id) healthCount 
-                                FROM Person__c
-                                GROUP BY Health_Status__c]) {
-            String healthStatus = String.valueOf(ar.get('Health_Status__c'));
-            Integer count = Integer.valueOf(ar.get('total'));
-            healthStatusMap.put(healthStatus, count);
+        
+        AggregateResult[] healthStatusMap = [SELECT Health_Status__c, COUNT(Id) healthCount 
+                                                FROM Person__c
+                                                GROUP BY Health_Status__c];
+        
+        if(healthStatusMap != null && healthStatusMap.size() > 0) {
+            Map<String, Integer> result = new Map<String, Integer>();
+            for(AggregateResult ar : healthStatusMap) {
+                String healthStatus = String.valueOf(ar.get('Health_Status__c'));
+                Integer count = Integer.valueOf(ar.get('healthCount'));
+                result.put(healthStatus, count);
+            }
+            return result;
         }
-        return healthStatusMap;
+        return null;
     }
 
     /**
@@ -94,7 +100,7 @@ public with sharing class CTPersonController {
                                                 FROM People_Tracing__c 
                                                 WHERE (Person_1__c IN :personIds OR Person_2__c IN :personIds)
                                                 AND Contact_Type__c = 'Cohabitant'
-                                                AND (Person_1__c.Health_Status__c IN :healthStatuses OR Person_2__c.Health_Status__c IN :healthStatuses)];
+                                                AND (Person_1__r.Health_Status__c IN :healthStatuses OR Person_2__r.Health_Status__c IN :healthStatuses)];
         Set<Id> cohabitants = new Set<Id>();
         for(People_Tracing__c pt : peopleTraces) {
             if(!alreadyProcessed.contains(pt.Person_1__c)){
@@ -105,8 +111,8 @@ public with sharing class CTPersonController {
                 cohabitants.add(pt.Person_2__c);
                 alreadyProcessed.add(pt.Person_2__c);
             }
-            return cohabitants;
         }
+        return cohabitants;
     }
 
     /**
@@ -121,7 +127,7 @@ public with sharing class CTPersonController {
                                                 FROM People_Tracing__c 
                                                 WHERE (Person_1__c IN :personIds OR Person_2__c IN :personIds)
                                                 AND Contact_Type__c = 'Neighbour'
-                                                AND (Person_1__c.Health_Status__c='Green' OR Person_2__c.Health_Status__c='Green')];
+                                                AND (Person_1__r.Health_Status__c='Green' OR Person_2__r.Health_Status__c='Green')];
         Set<Id> neighbour = new Set<Id>();
         for(People_Tracing__c pt : peopleTraces) {
             if(!alreadyProcessed.contains(pt.Person_1__c)){
@@ -132,8 +138,8 @@ public with sharing class CTPersonController {
                 neighbour.add(pt.Person_2__c);
                 alreadyProcessed.add(pt.Person_2__c);
             }
-            return neighbour;
         }
+        return neighbour;
     }
 
     /**
@@ -150,7 +156,7 @@ public with sharing class CTPersonController {
                                                 WHERE (Person_1__c IN :personIds OR Person_2__c IN :personIds)
                                                 AND Contact_Type__c = 'Other'
                                                 AND Contact_Date__c = LAST_N_DAYS:10
-                                                AND (Person_1__c.Health_Status__c IN :healthStatuses OR Person_2__c.Health_Status__c IN :healthStatuses)];
+                                                AND (Person_1__r.Health_Status__c IN :healthStatuses OR Person_2__r.Health_Status__c IN :healthStatuses)];
         Set<Id> primaryContacts = new Set<Id>();
         for(People_Tracing__c pt : peopleTraces) {
             if(!alreadyProcessed.contains(pt.Person_1__c)){
@@ -161,8 +167,8 @@ public with sharing class CTPersonController {
                 primaryContacts.add(pt.Person_2__c);
                 alreadyProcessed.add(pt.Person_2__c);
             }
-            return primaryContacts;
         }
+        return primaryContacts;
     }
 
     /**
@@ -178,7 +184,7 @@ public with sharing class CTPersonController {
                                                 WHERE (Person_1__c IN :primaryContactIds OR Person_2__c IN :primaryContactIds)
                                                 AND Contact_Type__c = 'Other'
                                                 AND Contact_Date__c = LAST_N_DAYS:10
-                                                AND (Person_1__c.Health_Status__c='Green' OR Person_2__c.Health_Status__c='Green')];
+                                                AND (Person_1__r.Health_Status__c='Green' OR Person_2__r.Health_Status__c='Green')];
         Set<Id> secondaryContacts = new Set<Id>();
         for(People_Tracing__c pt : peopleTraces) {
             if(!alreadyProcessed.contains(pt.Person_1__c)){
@@ -189,7 +195,7 @@ public with sharing class CTPersonController {
                 secondaryContacts.add(pt.Person_2__c);
                 alreadyProcessed.add(pt.Person_2__c);
             }
-            return neighbour;
         }
+        return secondaryContacts;
     }
 }
